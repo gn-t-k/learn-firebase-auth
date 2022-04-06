@@ -3,7 +3,6 @@ import {
   createUserWithEmailAndPassword,
   User,
   signInWithEmailAndPassword,
-  Auth,
   onAuthStateChanged,
   Unsubscribe,
 } from "firebase/auth";
@@ -49,9 +48,10 @@ export const signIn: SignIn = async (email, password) => {
   }
 };
 
-type ObserveAuthState = () => Promise<Unsubscribe>;
-export const observeAuthState = () => {
-  return onAuthStateChanged(auth, (user) => {
-    // TODO
-  });
+type Observer = (userState: User | null) => void;
+type SubscribeAuthState = (observer: Observer) => Unsubscribe;
+export const subscribeAuthState: SubscribeAuthState = (observer) => {
+  const unsubscribe = onAuthStateChanged(auth, observer);
+
+  return unsubscribe;
 };
