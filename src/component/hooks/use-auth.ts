@@ -1,4 +1,4 @@
-import { atom, useRecoilValue, useSetRecoilState } from "recoil";
+import { useGlobalState } from "lib/recoil/use-global-state";
 import {
   signIn as firebaseSignIn,
   signUp as firebaseSignUp,
@@ -18,13 +18,10 @@ type SignInProps = {
 };
 
 export const useAuth = () => {
-  const authRecoilState = atom<AuthState>({
+  const [authState, setAuthState] = useGlobalState<AuthState>({
     key: "authState",
-    default: { user: null },
+    defaultValue: { user: null },
   });
-
-  const authState = useRecoilValue(authRecoilState);
-  const setAuthState = useSetRecoilState(authRecoilState);
 
   const signUp = async ({ email, password }: SignUpProps) => {
     const result = await firebaseSignUp({ email, password });
