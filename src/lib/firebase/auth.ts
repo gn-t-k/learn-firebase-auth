@@ -6,16 +6,25 @@ import {
   onAuthStateChanged,
   Unsubscribe,
 } from "firebase/auth";
+import { app } from "./app";
 
-const auth = getAuth();
+const auth = getAuth(app);
 
 type Failure = {
   message: string;
 };
-type Result = User | Failure;
+type Result =
+  | {
+      isSuccess: true;
+      user: User;
+    }
+  | {
+      isSuccess: false;
+      failure: Failure;
+    };
 
-type SignUp = (email: string, password: string) => Promise<Result>;
-export const signUp: SignUp = async (email, password) => {
+type SignUp = (props: { email: string; password: string }) => Promise<Result>;
+export const signUp: SignUp = async ({ email, password }) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(
       auth,
@@ -23,16 +32,26 @@ export const signUp: SignUp = async (email, password) => {
       password
     );
 
-    return userCredential.user;
+    return {
+      isSuccess: true,
+      user: userCredential.user,
+    };
   } catch (error) {
     return {
-      message: error instanceof Error ? error.message : "create user failed",
+      isSuccess: false,
+      failure: {
+        message: error instanceof Error ? error.message : "create user failed",
+      },
     };
   }
 };
 
-type SignIn = (email: string, password: string) => Promise<Result>;
-export const signIn: SignIn = async (email, password) => {
+type SignInProps = {
+  email: string;
+  password: string;
+};
+type SignIn = (props: SignInProps) => Promise<Result>;
+export const signIn: SignIn = async ({ email, password }: SignInProps) => {
   try {
     const userCredential = await signInWithEmailAndPassword(
       auth,
@@ -40,10 +59,16 @@ export const signIn: SignIn = async (email, password) => {
       password
     );
 
-    return userCredential.user;
+    return {
+      isSuccess: true,
+      user: userCredential.user,
+    };
   } catch (error) {
     return {
-      message: error instanceof Error ? error.message : "create user failed",
+      isSuccess: false,
+      failure: {
+        message: error instanceof Error ? error.message : "create user failed",
+      },
     };
   }
 };
