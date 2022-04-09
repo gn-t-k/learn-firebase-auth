@@ -24,6 +24,8 @@ type Result =
       failure: Failure;
     };
 
+export type FirebaseUser = User;
+
 type SignUp = (props: { email: string; password: string }) => Promise<Result>;
 export const signUp: SignUp = async ({ email, password }) => {
   try {
