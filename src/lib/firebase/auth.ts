@@ -5,6 +5,7 @@ import {
   signInWithEmailAndPassword,
   onAuthStateChanged,
   Unsubscribe,
+  signOut as firebaseSignOut,
 } from "firebase/auth";
 import { app } from "./app";
 
@@ -71,6 +72,10 @@ export const signIn: SignIn = async ({ email, password }: SignInProps) => {
       },
     };
   }
+};
+
+export const signOut = async () => {
+  await firebaseSignOut(auth);
 };
 
 type Observer = (userState: User | null) => void;

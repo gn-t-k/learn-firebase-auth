@@ -2,6 +2,7 @@ import { useGlobalState } from "lib/recoil/use-global-state";
 import {
   signIn as firebaseSignIn,
   signUp as firebaseSignUp,
+  signOut as firebaseSingOut,
 } from "lib/firebase/auth";
 
 type User = { id: string };
@@ -35,5 +36,11 @@ export const useAuth = () => {
     setAuthState({ user: result.isSuccess ? { id: result.user.uid } : null });
   };
 
-  return [authState];
+  const signOut = async () => {
+    await firebaseSingOut();
+
+    setAuthState({ user: null });
+  };
+
+  return [authState, { signUp, signIn }];
 };
