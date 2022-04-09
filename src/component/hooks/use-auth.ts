@@ -13,7 +13,7 @@ type AuthState = {
   user: User | null;
 };
 
-type EmailAndPassword = {
+export type EmailAndPassword = {
   email: string;
   password: string;
 };
