@@ -34,6 +34,7 @@ export const useAuth: UseAuth = () => {
   });
 
   useEffect(() => {
+    console.log("effect");
     const observer = (firebaseUser: FirebaseUser | null) => {
       const user = firebaseUser !== null ? { id: firebaseUser.uid } : null;
 
@@ -43,7 +44,7 @@ export const useAuth: UseAuth = () => {
     const unsubscribe = subscribeAuthState(observer);
 
     return unsubscribe;
-  }, [setAuthState]);
+  }, []);
 
   const signUp = useCallback(async ({ email, password }: EmailAndPassword) => {
     await firebaseSignUp({ email, password });
