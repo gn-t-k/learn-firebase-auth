@@ -1,60 +1,60 @@
-import { useAuthState } from "lib/recoil/authState"
-import {
-  signIn as firebaseSignIn,
-  signUp as firebaseSignUp,
-  signOut as firebaseSingOut,
-  FirebaseUser,
-  subscribeAuthState,
-} from "lib/firebase/auth";
+import { useAuthState, useAuthStateMutators } from "lib/recoil/use-auth-state";
+import { useFirebaseAuth } from "lib/firebase/use-firebase-auth";
 import { useCallback, useEffect } from "react";
+import { User } from "feature/user/user";
 
-type User = { id: string };
+type UseAuth = () => [AuthState, AuthStateMutators];
+
 type AuthState = {
   user: User | null;
 };
-
-export type EmailAndPassword = {
-  email: string;
-  password: string;
+type AuthStateMutators = {
+  signUp: (props: { email: string; password: string }) => Promise<void>;
+  signIn: (props: { email: string; password: string }) => Promise<void>;
+  signOut: () => Promise<void>;
 };
-type SignUp = (props: EmailAndPassword) => Promise<void>;
-type SignIn = (props: EmailAndPassword) => Promise<void>;
-type SignOut = () => Promise<void>;
-
-type AuthStateMutator = {
-  signUp: SignUp;
-  signIn: SignIn;
-  signOut: SignOut;
-};
-type UseAuth = () => [AuthState, AuthStateMutator];
 
 export const useAuth: UseAuth = () => {
-  const [authState, setAuthState] = useAuthState()
+  const { setUser, unsetUser } = useAuthStateMutators();
+  const {
+    signUp: firebaseSignUp,
+    signIn: firebaseSignIn,
+    signOut: firebaseSignOut,
+    subscribeAuthState,
+  } = useFirebaseAuth();
 
   useEffect(() => {
-    console.log("effect");
-    const observer = (firebaseUser: FirebaseUser | null) => {
-      const user = firebaseUser !== null ? { id: firebaseUser.uid } : null;
-
-      setAuthState({ user });
+    const onSignIn = (user: User) => {
+      setUser(user.id);
+    };
+    const onSignOut = () => {
+      unsetUser();
     };
 
-    const unsubscribe = subscribeAuthState(observer);
+    const unsubscribe = subscribeAuthState({ onSignIn, onSignOut });
 
     return unsubscribe;
-  }, [setAuthState]);
+  }, [setUser, subscribeAuthState, unsetUser]);
 
-  const signUp = useCallback(async ({ email, password }: EmailAndPassword) => {
-    await firebaseSignUp({ email, password });
-  }, []);
+  const authState: AuthState = useAuthState();
 
-  const signIn = useCallback(async ({ email, password }: EmailAndPassword) => {
-    await firebaseSignIn({ email, password });
-  }, []);
+  const signUp: AuthStateMutators["signUp"] = useCallback(
+    async ({ email, password }) => {
+      await firebaseSignUp({ email, password });
+    },
+    [firebaseSignUp]
+  );
 
-  const signOut = useCallback(async () => {
-    await firebaseSingOut();
-  }, []);
+  const signIn: AuthStateMutators["signIn"] = useCallback(
+    async ({ email, password }) => {
+      await firebaseSignIn({ email, password });
+    },
+    [firebaseSignIn]
+  );
+
+  const signOut: AuthStateMutators["signOut"] = useCallback(async () => {
+    await firebaseSignOut();
+  }, [firebaseSignOut]);
 
   return [authState, { signUp, signIn, signOut }];
 };
