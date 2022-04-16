@@ -1,4 +1,4 @@
-import { useGlobalState } from "lib/recoil/use-global-state";
+import { useAuthState } from "lib/recoil/authState"
 import {
   signIn as firebaseSignIn,
   signUp as firebaseSignUp,
@@ -27,11 +27,9 @@ type AuthStateMutator = {
   signOut: SignOut;
 };
 type UseAuth = () => [AuthState, AuthStateMutator];
+
 export const useAuth: UseAuth = () => {
-  const [authState, setAuthState] = useGlobalState<AuthState>({
-    key: "authState",
-    defaultValue: { user: null },
-  });
+  const [authState, setAuthState] = useAuthState()
 
   useEffect(() => {
     console.log("effect");
@@ -44,7 +42,7 @@ export const useAuth: UseAuth = () => {
     const unsubscribe = subscribeAuthState(observer);
 
     return unsubscribe;
-  }, []);
+  }, [setAuthState]);
 
   const signUp = useCallback(async ({ email, password }: EmailAndPassword) => {
     await firebaseSignUp({ email, password });
