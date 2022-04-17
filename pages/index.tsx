@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import "modern-css-reset/dist/reset.min.css";
-import { useAuth } from "component/hooks/use-auth";
+import { useAuth } from "feature/user/use-auth";
 import { useState } from "react";
 
 type SignedOutProps = {
@@ -53,11 +53,11 @@ const SignedIn = ({ user, onClickSignOut }: SignedInProps): JSX.Element => (
 );
 
 const Home: NextPage = () => {
-  const [authState, { signUp, signIn, signOut }] = useAuth();
+  const [{ user, isProcessing, error }, { signUp, signIn, signOut }] =
+    useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const user = authState.user;
   const onClickSignIn = async () => {
     await signIn({ email, password });
   };
@@ -67,20 +67,25 @@ const Home: NextPage = () => {
   const onClickSignOut = async () => {
     await signOut();
   };
-  return (
+
+  return isProcessing ? (
+    <p>loading...</p>
+  ) : user === null ? (
     <>
-      {user === null ? (
-        <SignedOut
-          {...{
-            setEmail,
-            setPassword,
-            onClickSignIn,
-            onClickSignUp,
-          }}
-        />
-      ) : (
-        <SignedIn {...{ user, onClickSignOut }} />
-      )}
+      <SignedOut
+        {...{
+          setEmail,
+          setPassword,
+          onClickSignIn,
+          onClickSignUp,
+        }}
+      />
+      <p>{error}</p>
+    </>
+  ) : (
+    <>
+      <SignedIn {...{ user, onClickSignOut }} />
+      <p>{error}</p>
     </>
   );
 };
